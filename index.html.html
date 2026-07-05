@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de costo oculto de downtime · drwch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --graphite:#16191d;
+    --panel:#1e2228;
+    --panel-2:#242a31;
+    --steel:#333a43;
+    --steel-line:#3a424c;
+    --ink:#e8eaed;
+    --ink-dim:#9aa3ad;
+    --label:#7d8792;
+    --paper:#f4f5f6;
+    --paper-line:#e2e5e8;
+    --paper-ink:#1b1f24;
+    --paper-label:#5a636d;
+    --amber:#f0921e;
+    --amber-soft:#f6b45a;
+    --teal:#39b3a6;
+    --field-bg:#ffffff;
+    --field-border:#cfd4d9;
+    --focus:#39b3a6;
+    --radius:4px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:'Archivo',system-ui,sans-serif;
+    background:var(--graphite);
+    color:var(--ink);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 20px 40px}
+
+  /* Header */
+  .brand{display:flex;align-items:baseline;gap:12px;margin-bottom:6px}
+  .brand .mark{
+    font-weight:800;font-size:22px;letter-spacing:.5px;
+    color:var(--ink);text-transform:lowercase;
+  }
+  .brand .mark b{color:var(--amber)}
+  .brand .eyebrow{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;
+    letter-spacing:1.5px;text-transform:uppercase;color:var(--label);
+  }
+  h1{
+    font-size:clamp(24px,4.2vw,38px);font-weight:800;line-height:1.08;
+    letter-spacing:-.5px;margin:14px 0 10px;max-width:20ch;
+  }
+  h1 span{color:var(--amber)}
+  .lede{color:var(--ink-dim);max-width:58ch;font-size:15px}
+
+  /* Split */
+  .split{
+    display:grid;grid-template-columns:1fr 1fr;gap:0;
+    margin-top:26px;border:1px solid var(--steel-line);border-radius:var(--radius);
+    overflow:hidden;
+  }
+
+  /* Input side */
+  .inputs{background:var(--paper);color:var(--paper-ink);padding:26px 24px 28px}
+  .inputs .side-label{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1.5px;
+    text-transform:uppercase;color:var(--paper-label);margin-bottom:4px;
+  }
+  .inputs h2{font-size:17px;font-weight:700;margin-bottom:18px}
+  .group{margin-bottom:22px}
+  .group-title{
+    font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:1px;
+    text-transform:uppercase;color:var(--paper-label);
+    padding-bottom:6px;border-bottom:1px solid var(--paper-line);margin-bottom:14px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .group-title .idx{color:var(--amber);font-weight:600}
+  .field{margin-bottom:14px}
+  .field:last-child{margin-bottom:0}
+  .field label{display:block;font-size:13.5px;font-weight:600;margin-bottom:5px}
+  .field .hint{font-size:12px;color:var(--paper-label);margin-top:4px;line-height:1.35}
+  .input-row{position:relative;display:flex;align-items:stretch}
+  .input-row .pre{
+    display:flex;align-items:center;padding:0 10px;
+    background:#eef0f2;border:1px solid var(--field-border);border-right:none;
+    border-radius:var(--radius) 0 0 var(--radius);font-size:13px;color:var(--paper-label);
+    font-family:'IBM Plex Mono',monospace;min-width:38px;justify-content:center;
+  }
+  .input-row .suf{
+    display:flex;align-items:center;padding:0 10px;
+    background:#eef0f2;border:1px solid var(--field-border);border-left:none;
+    border-radius:0 var(--radius) var(--radius) 0;font-size:12px;color:var(--paper-label);
+    white-space:nowrap;
+  }
+  input[type=number],input[type=text].moneda{
+    flex:1;width:100%;font-family:'IBM Plex Mono',monospace;font-size:15px;
+    padding:9px 11px;border:1px solid var(--field-border);background:var(--field-bg);
+    color:var(--paper-ink);border-radius:0;min-width:0;
+  }
+  .input-row .pre + input{border-radius:0}
+  .input-row input:only-child{border-radius:var(--radius)}
+  .input-row .pre + input:last-child{border-radius:0 var(--radius) var(--radius) 0}
+  input:focus{outline:2px solid var(--focus);outline-offset:-1px;z-index:1;position:relative}
+  input[type=number]::-webkit-inner-spin-button{opacity:.4}
+  .moneda-field{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  .moneda-field label{font-size:13px;font-weight:600;white-space:nowrap}
+  .moneda-field select{
+    font-family:'IBM Plex Mono',monospace;font-size:13.5px;
+    padding:8px 34px 8px 11px;border:1px solid var(--field-border);
+    background-color:var(--field-bg);color:var(--paper-ink);border-radius:var(--radius);
+    cursor:pointer;-webkit-appearance:none;appearance:none;min-width:210px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%235a636d' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 11px center;
+  }
+  .moneda-field select:focus{outline:2px solid var(--focus);outline-offset:-1px}
+
+  /* Readout side */
+  .readout{
+    background:var(--panel);padding:26px 24px 28px;position:relative;
+    display:flex;flex-direction:column;
+  }
+  .readout::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,var(--amber),transparent 70%);
+  }
+  .readout .side-label{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1.5px;
+    text-transform:uppercase;color:var(--label);margin-bottom:4px;
+  }
+  .readout h2{font-size:17px;font-weight:700;margin-bottom:22px;color:var(--ink)}
+  .meter-label{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;
+    text-transform:uppercase;color:var(--label);margin-bottom:2px;
+  }
+  .meter-big{
+    font-family:'IBM Plex Mono',monospace;font-weight:600;
+    font-size:clamp(38px,7vw,56px);line-height:1;color:var(--amber);
+    letter-spacing:-1px;font-variant-numeric:tabular-nums;
+    display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;
+  }
+  .meter-big .cur{font-size:.42em;color:var(--amber-soft);font-weight:500}
+  .meter-sub{
+    font-size:13px;color:var(--ink-dim);margin-top:8px;
+  }
+  .meter-sub b{color:var(--ink);font-weight:600}
+
+  .divider{height:1px;background:var(--steel-line);margin:22px 0}
+
+  /* Stacked bar */
+  .bar-block{margin-bottom:4px}
+  .bar-title{
+    font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:1px;
+    text-transform:uppercase;color:var(--label);margin-bottom:10px;
+  }
+  .bar{
+    display:flex;height:34px;border-radius:3px;overflow:hidden;
+    background:var(--steel);border:1px solid var(--steel-line);
+  }
+  .seg{height:100%;transition:width .5s cubic-bezier(.4,0,.2,1);min-width:0}
+  .seg.visible{background:repeating-linear-gradient(135deg,#5a6470,#5a6470 6px,#525c67 6px,#525c67 12px)}
+  .seg.reinicio{background:var(--amber)}
+  .seg.mo{background:var(--amber-soft)}
+  .seg.recup{background:#c9761a}
+  .legend{margin-top:14px;display:grid;gap:8px}
+  .legend-row{display:flex;align-items:center;gap:9px;font-size:12.5px}
+  .legend-row .sw{width:11px;height:11px;border-radius:2px;flex:none}
+  .legend-row .sw.visible{background:#5a6470}
+  .legend-row .sw.reinicio{background:var(--amber)}
+  .legend-row .sw.mo{background:var(--amber-soft)}
+  .legend-row .sw.recup{background:#c9761a}
+  .legend-row .name{color:var(--ink-dim);flex:1}
+  .legend-row .val{font-family:'IBM Plex Mono',monospace;color:var(--ink);font-variant-numeric:tabular-nums}
+
+  .multiplier{
+    margin-top:22px;padding:16px 18px;background:var(--panel-2);
+    border:1px solid var(--steel-line);border-left:3px solid var(--amber);border-radius:3px;
+  }
+  .multiplier .mx{
+    font-family:'IBM Plex Mono',monospace;font-size:15px;color:var(--ink);
+  }
+  .multiplier .mx b{color:var(--amber);font-weight:600}
+  .multiplier .hint{font-size:12.5px;color:var(--ink-dim);margin-top:5px}
+
+  .avail{
+    margin-top:14px;font-size:12.5px;color:var(--ink-dim);
+    font-family:'IBM Plex Mono',monospace;display:none;
+  }
+  .avail b{color:var(--teal);font-weight:600}
+  .avail.show{display:block}
+
+  /* CTA */
+  .cta{
+    margin-top:26px;background:var(--panel);border:1px solid var(--steel-line);
+    border-radius:var(--radius);padding:24px;display:flex;flex-wrap:wrap;
+    align-items:center;justify-content:space-between;gap:18px;
+  }
+  .cta .txt{max-width:46ch}
+  .cta .txt strong{display:block;font-size:16px;margin-bottom:4px}
+  .cta .txt span{font-size:13.5px;color:var(--ink-dim)}
+  .cta-actions{display:flex;gap:10px;flex-wrap:wrap}
+  .btn{
+    font-family:'Archivo',sans-serif;font-weight:600;font-size:14px;
+    padding:11px 20px;border-radius:var(--radius);cursor:pointer;
+    border:1px solid transparent;text-decoration:none;display:inline-block;
+    transition:background .15s,border-color .15s;
+  }
+  .btn-primary{background:var(--amber);color:#1a1205}
+  .btn-primary:hover{background:var(--amber-soft)}
+  .btn-ghost{background:transparent;color:var(--ink);border-color:var(--steel-line)}
+  .btn-ghost:hover{border-color:var(--ink-dim)}
+
+  .foot{
+    margin-top:22px;font-size:11.5px;color:var(--label);line-height:1.5;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .foot a{color:var(--ink-dim)}
+
+  /* Responsive */
+  @media(max-width:760px){
+    .split{grid-template-columns:1fr}
+    .cta{flex-direction:column;align-items:flex-start}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .seg{transition:none}
+  }
+
+  /* Print */
+  @media print{
+    body{background:#fff;color:#000}
+    .wrap{max-width:none;padding:0}
+    .split{border-color:#ccc}
+    .inputs{background:#fff}
+    .readout{background:#fff;color:#000}
+    .readout h2,.readout .side-label,.meter-label,.bar-title{color:#333}
+    .meter-big{color:#000}.meter-big .cur{color:#555}
+    .meter-sub,.legend-row .name,.multiplier .hint,.cta,.foot{color:#333}
+    .legend-row .val,.multiplier .mx{color:#000}
+    .cta-actions,.btn{display:none}
+    .multiplier{background:#f5f5f5}
+    .readout::before{display:none}
+    .avail{color:#333}.avail b{color:#000}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <span class="mark">drwch<b>.</b></span>
+      <span class="eyebrow">Reducción de costos industriales</span>
+    </div>
+    <h1>¿Cuánto te cuesta <span>de verdad</span> el paro no planificado?</h1>
+    <p class="lede">La mayoría de las plantas contabilizan solo la producción perdida. El costo real incluye reinicios, personal parado y sobrecostos de recuperación. Mete tus datos y velo en tiempo real.</p>
+  </header>
+
+  <div class="split">
+
+    <!-- ENTRADA -->
+    <section class="inputs">
+      <div class="side-label">Entrada · tu operación</div>
+      <h2>Datos de tu planta</h2>
+
+      <div class="moneda-field">
+        <label for="moneda">Moneda</label>
+        <select id="moneda" aria-label="Moneda">
+          <option value="USD" selected>USD · Dólar (EC, SV, PA)</option>
+          <option value="ARS">ARS · Argentina</option>
+          <option value="BOB">BOB · Bolivia</option>
+          <option value="BRL">BRL · Brasil</option>
+          <option value="CLP">CLP · Chile</option>
+          <option value="COP">COP · Colombia</option>
+          <option value="CRC">CRC · Costa Rica</option>
+          <option value="DOP">DOP · Rep. Dominicana</option>
+          <option value="GTQ">GTQ · Guatemala</option>
+          <option value="HNL">HNL · Honduras</option>
+          <option value="MXN">MXN · México</option>
+          <option value="NIO">NIO · Nicaragua</option>
+          <option value="PYG">PYG · Paraguay</option>
+          <option value="PEN">PEN · Perú</option>
+          <option value="UYU">UYU · Uruguay</option>
+          <option value="VES">VES · Venezuela</option>
+        </select>
+      </div>
+
+      <div class="group">
+        <div class="group-title"><span class="idx">01</span> Costo visible</div>
+        <div class="field">
+          <label for="hParo">Horas de paro no planificado al mes</label>
+          <div class="input-row">
+            <input type="number" id="hParo" value="40" min="0" step="1">
+            <span class="suf">h / mes</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="valorHora">Valor de producción perdida por hora</label>
+          <div class="input-row">
+            <span class="pre" data-cur>$</span>
+            <input type="number" id="valorHora" value="800" min="0" step="10">
+            <span class="suf">/ hora</span>
+          </div>
+          <p class="hint">Idealmente el margen de contribución por hora; si no lo tenés, usá la facturación por hora que se deja de producir.</p>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-title"><span class="idx">02</span> Costos ocultos</div>
+        <div class="field">
+          <label for="eventos">Número de eventos de paro al mes</label>
+          <div class="input-row">
+            <input type="number" id="eventos" value="20" min="0" step="1">
+            <span class="suf">eventos</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="reinicio">Costo de reinicio por evento</label>
+          <div class="input-row">
+            <span class="pre" data-cur>$</span>
+            <input type="number" id="reinicio" value="250" min="0" step="10">
+            <span class="suf">/ evento</span>
+          </div>
+          <p class="hint">Scrap del arranque, recalentamiento, reajuste, material fuera de spec.</p>
+        </div>
+        <div class="field">
+          <label for="personal">Costo de personal durante el paro por hora</label>
+          <div class="input-row">
+            <span class="pre" data-cur>$</span>
+            <input type="number" id="personal" value="60" min="0" step="5">
+            <span class="suf">/ hora</span>
+          </div>
+          <p class="hint">Operadores y supervisión que se siguen pagando con la línea detenida.</p>
+        </div>
+        <div class="field">
+          <label for="recup">Sobrecosto de recuperación</label>
+          <div class="input-row">
+            <input type="number" id="recup" value="15" min="0" max="200" step="1">
+            <span class="suf">% de la producción perdida</span>
+          </div>
+          <p class="hint">Horas extra, turnos adicionales o fletes urgentes para reponer lo que no se produjo.</p>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-title"><span class="idx">03</span> Benchmark <span style="color:var(--paper-label);font-weight:400">· opcional</span></div>
+        <div class="field">
+          <label for="horasOp">Horas operativas planificadas al mes</label>
+          <div class="input-row">
+            <input type="number" id="horasOp" value="" min="0" step="1" placeholder="ej. 600">
+            <span class="suf">h / mes</span>
+          </div>
+          <p class="hint">Si lo llenás, calculamos tu disponibilidad y la comparamos con el estándar de clase mundial.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- LECTURA -->
+    <section class="readout">
+      <div class="side-label">Lectura · costo real</div>
+      <h2>Lo que te cuesta al año</h2>
+
+      <div class="meter-label">Costo total anual del downtime</div>
+      <div class="meter-big"><span class="cur" data-cur>$</span><span id="totalAnual">0</span></div>
+      <div class="meter-sub">De ese total, <b><span data-cur>$</span><span id="ocultoAnual">0</span></b> son costos ocultos que normalmente no se contabilizan.</div>
+
+      <div class="divider"></div>
+
+      <div class="bar-block">
+        <div class="bar-title">Composición del costo mensual</div>
+        <div class="bar" id="bar" role="img" aria-label="Composición del costo de downtime">
+          <div class="seg visible" id="segVisible"></div>
+          <div class="seg reinicio" id="segReinicio"></div>
+          <div class="seg mo" id="segMo"></div>
+          <div class="seg recup" id="segRecup"></div>
+        </div>
+        <div class="legend">
+          <div class="legend-row"><span class="sw visible"></span><span class="name">Producción perdida <em style="font-style:normal;color:var(--label)">(visible)</em></span><span class="val"><span data-cur>$</span><span id="valVisible">0</span></span></div>
+          <div class="legend-row"><span class="sw reinicio"></span><span class="name">Reinicios</span><span class="val"><span data-cur>$</span><span id="valReinicio">0</span></span></div>
+          <div class="legend-row"><span class="sw mo"></span><span class="name">Personal parado</span><span class="val"><span data-cur>$</span><span id="valMo">0</span></span></div>
+          <div class="legend-row"><span class="sw recup"></span><span class="name">Recuperación</span><span class="val"><span data-cur>$</span><span id="valRecup">0</span></span></div>
+        </div>
+      </div>
+
+      <div class="multiplier">
+        <div class="mx">El costo real es <b><span id="mult">1.0</span>×</b> lo que se contabiliza como producción perdida.</div>
+        <div class="hint">Por cada dólar visible, hay <span id="centavos">0</span> centavos que se pierden sin quedar registrados.</div>
+      </div>
+
+      <div class="avail" id="avail">Disponibilidad estimada: <b><span id="dispPct">0</span>%</b> · clase mundial ≥ 90%</div>
+    </section>
+  </div>
+
+  <div class="cta">
+    <div class="txt">
+      <strong>Este número es el punto de partida, no el diagnóstico.</strong>
+      <span>En 30 minutos identificamos de dónde salen tus paros y qué porción es recuperable en 90 días. Sin costo, sin compromiso.</span>
+    </div>
+    <div class="cta-actions">
+      <a class="btn btn-primary" href="https://calendly.com/ydarwiche-drwch/30min" target="_blank" rel="noopener">Agendar diagnóstico</a>
+      <button class="btn btn-ghost" onclick="window.print()">Descargar resultado</button>
+    </div>
+  </div>
+
+  <p class="foot">
+    Estimación orientativa basada en los datos que ingresás. No sustituye un análisis de planta.
+    &nbsp;·&nbsp; drwch — reducción de costos industriales · <a href="https://drwch.com" target="_blank" rel="noopener">drwch.com</a>
+  </p>
+</div>
+
+<script>
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var SIMBOLOS = {
+    USD:'$', ARS:'$', BOB:'Bs', BRL:'R$', CLP:'$', COP:'$', CRC:'₡',
+    DOP:'RD$', GTQ:'Q', HNL:'L', MXN:'$', NIO:'C$', PYG:'₲',
+    PEN:'S/', UYU:'$', VES:'Bs'
+  };
+  var ids = ['moneda','hParo','valorHora','eventos','reinicio','personal','recup','horasOp'];
+  var el = {};
+  ids.forEach(function(i){ el[i] = document.getElementById(i); });
+
+  function num(id){ var v = parseFloat(el[id].value); return isNaN(v)?0:Math.max(0,v); }
+  function fmt(n){ return Math.round(n).toLocaleString('es-CR'); }
+
+  // animated number tweening for the two big readouts
+  var anim = {};
+  function setNum(id, target){
+    var node = document.getElementById(id);
+    if(reduce){ node.textContent = fmt(target); return; }
+    var start = anim[id]!==undefined ? anim[id] : 0;
+    var t0 = performance.now(), dur = 450;
+    if(anim[id+'_raf']) cancelAnimationFrame(anim[id+'_raf']);
+    function step(now){
+      var p = Math.min(1,(now-t0)/dur);
+      var e = 1-Math.pow(1-p,3);
+      var val = start + (target-start)*e;
+      node.textContent = fmt(val);
+      if(p<1){ anim[id+'_raf']=requestAnimationFrame(step); } else { anim[id]=target; }
+    }
+    anim[id+'_raf']=requestAnimationFrame(step);
+  }
+
+  function calc(){
+    var moneda = el.moneda.value || 'USD';
+    var simbolo = SIMBOLOS[moneda] || '$';
+    document.querySelectorAll('[data-cur]').forEach(function(n){ n.textContent = simbolo; });
+
+    var hParo = num('hParo');
+    var valorHora = num('valorHora');
+    var eventos = num('eventos');
+    var reinicioU = num('reinicio');
+    var personal = num('personal');
+    var recupPct = num('recup');
+
+    var visible   = hParo * valorHora;
+    var reinicio  = eventos * reinicioU;
+    var mo        = hParo * personal;
+    var recup     = visible * (recupPct/100);
+
+    var oculto = reinicio + mo + recup;
+    var totalMes = visible + oculto;
+
+    // legend values (monthly)
+    setNum('valVisible', visible);
+    setNum('valReinicio', reinicio);
+    setNum('valMo', mo);
+    setNum('valRecup', recup);
+
+    // annual readouts
+    setNum('totalAnual', totalMes*12);
+    setNum('ocultoAnual', oculto*12);
+
+    // stacked bar widths
+    var tot = totalMes>0?totalMes:1;
+    document.getElementById('segVisible').style.width  = (visible/tot*100)+'%';
+    document.getElementById('segReinicio').style.width = (reinicio/tot*100)+'%';
+    document.getElementById('segMo').style.width       = (mo/tot*100)+'%';
+    document.getElementById('segRecup').style.width    = (recup/tot*100)+'%';
+
+    // multiplier
+    var mult = visible>0 ? (totalMes/visible) : 0;
+    document.getElementById('mult').textContent = mult>0 ? mult.toFixed(1) : '—';
+    var cent = visible>0 ? Math.round((oculto/visible)*100) : 0;
+    document.getElementById('centavos').textContent = cent;
+
+    // availability benchmark (optional)
+    var horasOp = num('horasOp');
+    var availBox = document.getElementById('avail');
+    if(horasOp > 0 && hParo <= horasOp){
+      var disp = (1 - hParo/horasOp)*100;
+      document.getElementById('dispPct').textContent = disp.toFixed(1);
+      availBox.classList.add('show');
+    } else {
+      availBox.classList.remove('show');
+    }
+  }
+
+  ids.forEach(function(i){
+    el[i].addEventListener('input', calc);
+    el[i].addEventListener('change', calc);
+  });
+  calc();
+})();
+</script>
+</body>
+</html>
