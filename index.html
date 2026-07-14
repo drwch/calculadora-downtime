@@ -193,6 +193,81 @@
   .avail b{color:var(--teal);font-weight:600}
   .avail.show{display:block}
 
+  /* KPIs derivados */
+  .kpi-title{
+    font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:1px;
+    text-transform:uppercase;color:var(--label);margin-bottom:10px;
+  }
+  .kpis{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  .kpi{
+    background:var(--panel-2);border:1px solid var(--steel-line);border-radius:4px;padding:10px 11px;
+  }
+  .kpi .k-lab{
+    font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:.5px;
+    text-transform:uppercase;color:var(--label);margin-bottom:5px;line-height:1.3;
+  }
+  .kpi .k-val{
+    font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:20px;color:var(--ink);
+    line-height:1;font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:3px;
+  }
+  .kpi .k-cur{font-size:.6em;color:var(--ink-dim);font-weight:500}
+  .kpi .k-u{font-size:.55em;color:var(--ink-dim);font-weight:500}
+  .kpi .k-note{font-size:10.5px;color:var(--label);margin-top:5px;line-height:1.3}
+  .kpi.good .k-val{color:var(--teal)}
+  .kpi.warn .k-val{color:var(--amber)}
+  .kpi.dim .k-val{color:var(--label)}
+
+  /* Perfil de paro */
+  .profile{
+    margin-top:14px;background:var(--panel-2);border:1px solid var(--steel-line);
+    border-left:3px solid var(--amber);border-radius:3px;padding:13px 15px;
+  }
+  .profile .p-head{display:flex;align-items:center;gap:9px;margin-bottom:6px;flex-wrap:wrap}
+  .profile .p-tag{
+    font-family:'IBM Plex Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:1px;
+    text-transform:uppercase;background:var(--amber);color:#1a1205;padding:2px 7px;border-radius:3px;
+  }
+  .profile .p-name{font-size:13.5px;font-weight:700;color:var(--ink)}
+  .profile .p-txt{font-size:12.5px;color:var(--ink-dim);line-height:1.45}
+  .profile .p-txt b{color:var(--ink);font-weight:600}
+
+  /* Ecuación de disponibilidad */
+  .eqbox{
+    margin-top:14px;background:var(--panel-2);border:1px solid var(--steel-line);
+    border-radius:4px;padding:12px 14px;display:none;
+  }
+  .eqbox.show{display:block}
+  .eq-title{
+    font-family:'IBM Plex Mono',monospace;font-size:9.5px;letter-spacing:1px;
+    text-transform:uppercase;color:var(--label);margin-bottom:9px;
+  }
+  .eq{
+    display:flex;align-items:center;gap:5px;flex-wrap:wrap;
+    font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;
+  }
+  .eq-t{color:var(--teal)}
+  .eq-t.alt{color:var(--amber)}
+  .eq-o,.eq-p{color:var(--label);font-weight:400}
+  .eq-r{color:var(--ink);margin-left:2px}
+  .eq-nums{
+    margin-top:7px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;
+    color:var(--label);letter-spacing:.2px;
+  }
+  .eq-nums b{color:var(--ink-dim);font-weight:500}
+
+  /* Eje de palanca (confiabilidad vs mantenibilidad) */
+  .p-lever{
+    margin-top:10px;padding-top:10px;border-top:1px solid var(--steel-line);
+    display:flex;align-items:flex-start;gap:8px;
+  }
+  .pl-tag{
+    flex:none;font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;
+    letter-spacing:.8px;text-transform:uppercase;background:var(--steel);color:var(--ink);
+    padding:2px 6px;border-radius:3px;margin-top:1px;
+  }
+  .pl-txt{font-size:12px;color:var(--ink-dim);line-height:1.45}
+  .pl-txt b{color:var(--ink);font-weight:600}
+
   /* CTA */
   .cta{
     margin-top:26px;background:var(--panel);border:1px solid var(--steel-line);
@@ -229,21 +304,91 @@
     .seg{transition:none}
   }
 
-  /* Print */
+  /* Print — todo el contenido en 2 páginas tamaño carta */
+  @page{ size:letter; margin:12mm 13mm; }
   @media print{
-    body{background:#fff;color:#000}
-    .wrap{max-width:none;padding:0}
-    .split{border-color:#ccc}
-    .inputs{background:#fff}
-    .readout{background:#fff;color:#000}
-    .readout h2,.readout .side-label,.meter-label,.bar-title{color:#333}
-    .meter-big{color:#000}.meter-big .cur{color:#555}
-    .meter-sub,.legend-row .name,.multiplier .hint,.cta,.foot{color:#333}
-    .legend-row .val,.multiplier .mx{color:#000}
-    .cta-actions,.btn{display:none}
-    .multiplier{background:#f5f5f5}
+    /* Fuerza la impresión de TODOS los colores y fondos (barra, swatches, etc.)
+       sin depender de la casilla "Gráficos de fondo" del navegador */
+    *{ -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; color-adjust:exact !important; }
+
+    html,body{background:#fff;color:#000}
+    .wrap{max-width:none;padding:0;margin:0}
+
+    /* Encabezado compacto */
+    header{margin-bottom:5px}
+    .brand{margin-bottom:3px}
+    h1{font-size:17px;margin:4px 0;max-width:none;line-height:1.12}
+    .lede{font-size:10px;max-width:none;margin:0;line-height:1.4}
+
+    /* Layout dos columnas — el bloque SÍ puede partirse entre páginas
+       (si se le impide, el navegador lo empuja entero y deja la hoja 1 en blanco) */
+    .split{margin-top:9px;border-color:#ccc}
+    .inputs{background:#fff;padding:12px 14px}
+    .readout{background:#fff;color:#000;padding:12px 14px}
+    .inputs h2,.readout h2{font-size:13.5px;margin-bottom:8px}
+    .inputs .side-label,.readout .side-label{font-size:10px}
+
+    /* Ocultar ayudas y botones (no aplican en papel) */
+    .hint{display:none !important}
+    .cta-actions,.btn{display:none !important}
     .readout::before{display:none}
+
+    /* Compactar campos */
+    .group{margin-bottom:8px}
+    .group-title{margin-bottom:6px;padding-bottom:4px}
+    .field{margin-bottom:6px}
+    .field label{margin-bottom:2px;font-size:11.5px}
+    input[type=number],.moneda-field select{padding:4px 9px;font-size:11.5px}
+    .moneda-field{margin-bottom:8px}
+
+    /* Colores/legibilidad en impresión */
+    .readout .side-label,.meter-label,.bar-title{color:#333}
+    .meter-big{color:#000;font-size:32px}.meter-big .cur{color:#555}
+    .meter-sub,.legend-row .name,.multiplier .hint{color:#333}
+    .legend-row .val,.multiplier .mx{color:#000}
+    .multiplier{background:#f5f5f5;margin-top:10px}
     .avail{color:#333}.avail b{color:#000}
+    .divider{margin:10px 0}
+
+    /* La barra de composición y sus colores SÍ se imprimen */
+    .bar,.seg,.legend-row .sw{ -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+
+    /* --- Indicadores, ecuación y perfil: legibles en papel --- */
+    .kpi-title{color:#333;margin-bottom:7px}
+    .kpis{gap:7px}
+    .kpi{background:#f7f7f7;border:1px solid #ccc;padding:8px 9px}
+    .kpi .k-lab{color:#555}
+    .kpi .k-val{color:#000;font-size:17px}
+    .kpi .k-cur,.kpi .k-u{color:#555}
+    .kpi .k-note{color:#666}
+    .kpi.good .k-val,.kpi.warn .k-val,.kpi.dim .k-val{color:#000}
+
+    .eqbox{background:#f7f7f7;border:1px solid #ccc;margin-top:10px;padding:9px 11px}
+    .eq-title{color:#555}
+    .eq-t,.eq-t.alt{color:#000}
+    .eq-o,.eq-p,.eq-nums{color:#555}
+    .eq-r{color:#000}
+    .eq-nums b{color:#333}
+
+    .profile{background:#f7f7f7;border:1px solid #ccc;border-left:3px solid #999;margin-top:10px;padding:10px 12px}
+    .profile .p-tag{background:#333;color:#fff}
+    .profile .p-name{color:#000}
+    .profile .p-txt{color:#333}
+    .profile .p-txt b{color:#000}
+    .p-lever{border-top:1px solid #ddd}
+    .pl-tag{background:#ddd;color:#000}
+    .pl-txt{color:#333}
+    .pl-txt b{color:#000}
+
+    /* Piezas pequeñas: que no se partan por la mitad */
+    .kpi,.eqbox,.profile,.multiplier,.bar-block,.group{
+      break-inside:avoid;page-break-inside:avoid;
+    }
+
+    /* Invitación + nota: fluyen tras la calculadora, sin corte forzado */
+    .cta{background:#fff;border:1px solid #ccc;color:#333;margin-top:12px;break-inside:avoid;page-break-inside:avoid}
+    .cta .txt strong{color:#000}
+    .foot{color:#333;break-inside:avoid;page-break-inside:avoid;margin-top:10px}
   }
 </style>
 </head>
@@ -269,7 +414,7 @@
       <div class="moneda-field">
         <label for="moneda">Moneda</label>
         <select id="moneda" aria-label="Moneda">
-          <option value="USD" selected>USD · Dólar </option>
+          <option value="USD" selected>USD · Dólar</option>
           <option value="ARS">ARS · Argentina</option>
           <option value="BOB">BOB · Bolivia</option>
           <option value="BRL">BRL · Brasil</option>
@@ -346,14 +491,22 @@
       </div>
 
       <div class="group">
-        <div class="group-title"><span class="idx">03</span> Benchmark <span style="color:var(--paper-label);font-weight:400">· opcional</span></div>
+        <div class="group-title"><span class="idx">03</span> Diagnóstico <span style="color:var(--paper-label);font-weight:400">· opcional</span></div>
         <div class="field">
           <label for="horasOp">Horas operativas planificadas al mes</label>
           <div class="input-row">
             <input type="number" id="horasOp" value="" min="0" step="1" placeholder="ej. 600">
             <span class="suf">h / mes</span>
           </div>
-          <p class="hint">Si lo llenás, calculamos tu disponibilidad y la comparamos con el estándar de clase mundial.</p>
+          <p class="hint">Si lo llenás, calculamos tu disponibilidad, el MTBF y cómo se compone tu diagnóstico. El MTBF es una estimación: asume que las horas de paro que ingresaste son fallas no planificadas.</p>
+        </div>
+        <div class="field">
+          <label for="hPlan">Horas de paro planificado al mes</label>
+          <div class="input-row">
+            <input type="number" id="hPlan" value="" min="0" step="1" placeholder="ej. 20">
+            <span class="suf">h / mes</span>
+          </div>
+          <p class="hint">Mantenimiento preventivo y paros programados. Nos permite medir tu ratio planificado vs. reactivo.</p>
         </div>
       </div>
     </section>
@@ -390,7 +543,60 @@
         <div class="hint">Por cada dólar visible, hay <span id="centavos">0</span> centavos que se pierden sin quedar registrados.</div>
       </div>
 
-      <div class="avail" id="avail">Disponibilidad estimada: <b><span id="dispPct">0</span>%</b> · clase mundial ≥ 90%</div>
+      <div class="divider"></div>
+
+      <div class="kpi-title">Indicadores</div>
+      <div class="kpis">
+        <div class="kpi">
+          <div class="k-lab">Costo por evento</div>
+          <div class="k-val"><span class="k-cur" data-cur>$</span><span id="kCosto">0</span></div>
+          <div class="k-note">cada vez que se detiene</div>
+        </div>
+        <div class="kpi" id="kDispBox">
+          <div class="k-lab">Disponibilidad</div>
+          <div class="k-val"><span id="kDisp">—</span><span class="k-u">%</span></div>
+          <div class="k-note" id="kDispNote">clase mundial ≥ 90%</div>
+        </div>
+
+        <div class="kpi">
+          <div class="k-lab">Duración media (MTTR)</div>
+          <div class="k-val"><span id="kMttr">0</span><span class="k-u" id="kMttrU">min</span></div>
+          <div class="k-note"><span id="kMttrAlt">—</span> · mantenibilidad</div>
+        </div>
+        <div class="kpi" id="kFreqBox">
+          <div class="k-lab">Frecuencia de paro</div>
+          <div class="k-val"><span id="kFreq">—</span><span class="k-u">/ día</span></div>
+          <div class="k-note" id="kFreqNote">veces que se detiene por día</div>
+        </div>
+
+        <div class="kpi" id="kMtbfBox">
+          <div class="k-lab">Tiempo entre fallas (MTBF)</div>
+          <div class="k-val"><span id="kMtbf">—</span><span class="k-u" id="kMtbfU">h</span></div>
+          <div class="k-note" id="kMtbfNote">estimado · confiabilidad</div>
+        </div>
+        <div class="kpi" id="kRatioBox">
+          <div class="k-lab">Planificado vs. reactivo</div>
+          <div class="k-val"><span id="kRatio">—</span></div>
+          <div class="k-note" id="kRatioNote">estándar ≈ 80 / 20</div>
+        </div>
+      </div>
+
+      <div class="eqbox" id="eqbox">
+        <div class="eq-title">Cómo se compone tu disponibilidad</div>
+        <div class="eq">
+          <span class="eq-t">MTBF</span><span class="eq-o">÷</span><span class="eq-p">(</span><span class="eq-t">MTBF</span><span class="eq-o">+</span><span class="eq-t alt">MTTR</span><span class="eq-p">)</span><span class="eq-o">=</span><span class="eq-r" id="eqRes">—</span>
+        </div>
+        <div class="eq-nums" id="eqNums">—</div>
+      </div>
+
+      <div class="profile" id="profile">
+        <div class="p-head"><span class="p-tag" id="pTag">—</span><span class="p-name" id="pName">Perfil de paro</span></div>
+        <div class="p-txt" id="pTxt">Ingresá tus datos para ver el diagnóstico.</div>
+        <div class="p-lever" id="pLever" style="display:none">
+          <span class="pl-tag" id="plTag">—</span>
+          <span class="pl-txt" id="plTxt"></span>
+        </div>
+      </div>
     </section>
   </div>
 
@@ -419,7 +625,7 @@
     DOP:'RD$', GTQ:'Q', HNL:'L', MXN:'$', NIO:'C$', PYG:'₲',
     PEN:'S/', UYU:'$', VES:'Bs'
   };
-  var ids = ['moneda','hParo','valorHora','eventos','reinicio','personal','recup','horasOp'];
+  var ids = ['moneda','hParo','valorHora','eventos','reinicio','personal','recup','horasOp','hPlan'];
   var el = {};
   ids.forEach(function(i){ el[i] = document.getElementById(i); });
 
@@ -487,15 +693,180 @@
     var cent = visible>0 ? Math.round((oculto/visible)*100) : 0;
     document.getElementById('centavos').textContent = cent;
 
-    // availability benchmark (optional)
-    var horasOp = num('horasOp');
-    var availBox = document.getElementById('avail');
-    if(horasOp > 0 && hParo <= horasOp){
-      var disp = (1 - hParo/horasOp)*100;
-      document.getElementById('dispPct').textContent = disp.toFixed(1);
-      availBox.classList.add('show');
+    // ---- Indicadores derivados ----
+    // Costo promedio por evento
+    var costoEvento = eventos>0 ? totalMes/eventos : 0;
+    document.getElementById('kCosto').textContent = eventos>0 ? fmt(costoEvento) : '—';
+
+    // MTTR — duración media por evento. Se muestra en la unidad natural
+    // (min si es <1 h, h si es más) y la otra unidad va como equivalencia en la nota.
+    var mttr = eventos>0 ? (hParo/eventos)*60 : 0;   // minutos
+    var mttrH = mttr/60;                              // horas
+    var mv2=document.getElementById('kMttr'), mu2=document.getElementById('kMttrU'), ma2=document.getElementById('kMttrAlt');
+    if(eventos>0 && hParo>0){
+      if(mttr < 60){
+        mv2.textContent = mttr<10 ? mttr.toFixed(1) : Math.round(mttr);
+        mu2.textContent = 'min';
+        ma2.textContent = '= '+mttrH.toFixed(mttrH<1?2:1)+' h';
+      } else {
+        mv2.textContent = mttrH<10 ? mttrH.toFixed(1) : Math.round(mttrH);
+        mu2.textContent = 'h';
+        ma2.textContent = '= '+Math.round(mttr)+' min';
+      }
     } else {
-      availBox.classList.remove('show');
+      mv2.textContent='—'; mu2.textContent='min'; ma2.textContent='—';
+    }
+
+    // MTBF — tiempo medio entre fallas = horas en marcha / eventos
+    // (requiere horas operativas; sin ellas no se puede saber cuánto estuvo corriendo)
+    var horasOpRaw = num('horasOp');
+    var mtbf = null; // en horas
+    var mtbfBox = document.getElementById('kMtbfBox');
+    if(horasOpRaw > 0 && eventos > 0 && hParo <= horasOpRaw){
+      var horasMarcha = horasOpRaw - hParo;
+      mtbf = horasMarcha / eventos;
+      var mv = document.getElementById('kMtbf'), mu = document.getElementById('kMtbfU');
+      if(mtbf < 1){ mv.textContent = Math.round(mtbf*60); mu.textContent='min'; }
+      else { mv.textContent = mtbf<10 ? mtbf.toFixed(1) : Math.round(mtbf); mu.textContent='h'; }
+      mtbfBox.classList.remove('dim');
+    } else {
+      document.getElementById('kMtbf').textContent='—';
+      document.getElementById('kMtbfU').textContent='h';
+      mtbfBox.classList.add('dim');
+      document.getElementById('kMtbfNote').textContent = eventos>0 ? 'ingresá horas operativas' : 'estimado · confiabilidad';
+    }
+    if(mtbf!==null) document.getElementById('kMtbfNote').textContent='estimado · confiabilidad';
+
+    // Disponibilidad (opcional)
+    var horasOp = num('horasOp');
+    var dispBox = document.getElementById('kDispBox');
+    var disp = null;
+    if(horasOp > 0 && hParo <= horasOp){
+      disp = (1 - hParo/horasOp)*100;
+      document.getElementById('kDisp').textContent = disp.toFixed(1);
+      dispBox.classList.remove('dim');
+      dispBox.classList.toggle('good', disp>=90);
+      dispBox.classList.toggle('warn', disp<90);
+      document.getElementById('kDispNote').textContent = disp>=90 ? 'clase mundial ✓' : 'clase mundial ≥ 90%';
+    } else {
+      document.getElementById('kDisp').textContent = '—';
+      dispBox.classList.add('dim'); dispBox.classList.remove('good','warn');
+      document.getElementById('kDispNote').textContent = 'ingresá horas operativas';
+    }
+
+    // Frecuencia de paro — eventos por día operativo
+    // Si hay horas operativas, se derivan los días reales de operación; si no, se asume mes de 30 días.
+    var freqBox = document.getElementById('kFreqBox');
+    var freqNote = document.getElementById('kFreqNote');
+    if(eventos>0){
+      var diasOp, aprox=false;
+      if(horasOpRaw > 0){ diasOp = horasOpRaw/24; }   // días equivalentes de operación planificada
+      else { diasOp = 30; aprox=true; }
+      var freq = diasOp>0 ? eventos/diasOp : 0;
+      document.getElementById('kFreq').textContent = freq>=10 ? Math.round(freq) : freq.toFixed(1);
+      freqBox.classList.remove('dim');
+      freqBox.classList.toggle('warn', freq>=3);
+      freqNote.textContent = aprox ? 'estimado sobre 30 días' : 'veces que se detiene por día';
+    } else {
+      document.getElementById('kFreq').textContent='—';
+      freqBox.classList.add('dim'); freqBox.classList.remove('warn');
+      freqNote.textContent='veces que se detiene por día';
+    }
+
+    // Ratio planificado vs. reactivo (opcional)
+    var hPlan = num('hPlan');
+    var ratioBox = document.getElementById('kRatioBox');
+    var pctPlan = null;
+    if((hPlan + hParo) > 0 && hPlan > 0){
+      pctPlan = hPlan/(hPlan+hParo)*100;
+      document.getElementById('kRatio').textContent = Math.round(pctPlan)+' / '+Math.round(100-pctPlan);
+      ratioBox.classList.remove('dim');
+      ratioBox.classList.toggle('good', pctPlan>=80);
+      ratioBox.classList.toggle('warn', pctPlan<80);
+      document.getElementById('kRatioNote').textContent = pctPlan>=80 ? 'en el estándar ✓' : 'estándar ≈ 80 / 20';
+    } else {
+      document.getElementById('kRatio').textContent = '—';
+      ratioBox.classList.add('dim'); ratioBox.classList.remove('good','warn');
+      document.getElementById('kRatioNote').textContent = 'ingresá paro planificado';
+    }
+
+    // ---- Perfil de paro (diagnóstico automático) ----
+    var pTag = document.getElementById('pTag');
+    var pName = document.getElementById('pName');
+    var pTxt  = document.getElementById('pTxt');
+
+    if(eventos<=0 || hParo<=0){
+      pTag.textContent='—'; pName.textContent='Perfil de paro';
+      pTxt.textContent='Ingresá tus horas de paro y número de eventos para ver el diagnóstico.';
+    } else {
+      var perfil, nombre, texto;
+      // Umbral: 30 min de MTTR separa el paro corto/recurrente del paro largo/mayor
+      if(mttr < 30 && eventos >= 10){
+        perfil='Crónico'; nombre='Paros cortos y frecuentes';
+        texto='Tus paros son <b>breves pero muy repetidos</b> ('+eventos+' eventos, '+
+              (mttr<10?mttr.toFixed(1):Math.round(mttr))+' min en promedio). Este patrón suele responder a microparos, ajustes y arranques. '+
+              'El costo se acumula por <b>frecuencia</b>, no por duración: los reinicios pesan más de lo que parece. '+
+              '<b>Palanca:</b> reducir la cantidad de eventos y abaratar cada arranque (setup rápido, estandarización).';
+      } else if(mttr >= 120 && eventos < 10){
+        perfil='Esporádico'; nombre='Paros largos y aislados';
+        texto='Tus paros son <b>pocos pero muy prolongados</b> ('+eventos+' eventos, '+
+              (mttr/60).toFixed(1)+' h en promedio). Este patrón apunta a fallas mayores, espera de repuestos o tiempos de respuesta lentos. '+
+              '<b>Palanca:</b> confiabilidad de los equipos críticos y velocidad de reparación (repuestos, diagnóstico, plan de contingencia).';
+      } else {
+        perfil='Mixto'; nombre='Patrón mixto';
+        texto='Tenés <b>'+eventos+' eventos</b> de <b>'+(mttr<60?Math.round(mttr)+' min':(mttr/60).toFixed(1)+' h')+'</b> en promedio: '+
+              'ni puramente crónico ni puramente esporádico. Antes de invertir, conviene <b>separar las causas</b>: casi siempre unas pocas concentran la mayoría del tiempo perdido. '+
+              '<b>Palanca:</b> registrar los paros 30 días y ordenarlos por costo (Pareto).';
+      }
+      // Matiz si el ratio planificado es bajo
+      if(pctPlan!==null && pctPlan<50){
+        texto += ' Además, solo el <b>'+Math.round(pctPlan)+'%</b> de tu paro es planificado: estás operando en modo reactivo.';
+      }
+      pTag.textContent=perfil; pName.textContent=nombre; pTxt.innerHTML=texto;
+    }
+
+    // ---- Ecuación de disponibilidad (MTBF / (MTBF + MTTR)) ----
+    var eqbox = document.getElementById('eqbox');
+    if(mtbf!==null && disp!==null){
+      var dispCalc = mtbf/(mtbf+mttrH)*100;
+      document.getElementById('eqRes').textContent = dispCalc.toFixed(1)+'%';
+      function hFmt(h){ return h<1 ? Math.round(h*60)+' min' : (h<10?h.toFixed(1):Math.round(h))+' h'; }
+      document.getElementById('eqNums').innerHTML =
+        'MTBF <b>'+hFmt(mtbf)+'</b> &nbsp;·&nbsp; MTTR <b>'+hFmt(mttrH)+'</b>';
+      eqbox.classList.add('show');
+    } else {
+      eqbox.classList.remove('show');
+    }
+
+    // ---- Eje: confiabilidad vs. mantenibilidad ----
+    var lever = document.getElementById('pLever');
+    if(mtbf!==null && eventos>0 && hParo>0){
+      var mttrH2 = mttr/60;
+      var plTag = document.getElementById('plTag');
+      var plTxt = document.getElementById('plTxt');
+      // Regla: ¿qué domina la pérdida de disponibilidad?
+      // Si el MTBF es corto -> falla seguido (confiabilidad). Si el MTTR pesa mucho vs MTBF -> tarda en volver (mantenibilidad).
+      var razon = mttrH2>0 ? (mtbf/mttrH2) : 999;  // cuántas horas corre por cada hora de reparación
+      // razón alta  = aguanta mucho y/o repara rápido  -> el problema es que falla (confiabilidad)... salvo que el MTBF sea largo
+      // razón baja  = por cada hora de marcha, mucha reparación -> tarda en volver (mantenibilidad)
+      if(razon < 20 && mtbf < 24){
+        plTag.textContent='Confiabilidad';
+        plTxt.innerHTML='Tu equipo falla cada <b>'+(mtbf<1?Math.round(mtbf*60)+' min':(mtbf<10?mtbf.toFixed(1):Math.round(mtbf))+' h')+'</b> de marcha. '+
+          'El cuello de botella es <b>que falla seguido</b>, no que tardes en repararlo. Repararlo más rápido no te salva: vas a volver a fallar. '+
+          'Invertí en <b>preventivo, análisis de causa raíz y repuestos críticos</b>.';
+      } else if(mttrH2 >= 2 && mtbf >= 24){
+        plTag.textContent='Mantenibilidad';
+        plTxt.innerHTML='Tu equipo aguanta bien (<b>'+(mtbf<10?mtbf.toFixed(1):Math.round(mtbf))+' h</b> entre fallas), pero cuando cae tarda <b>'+
+          (mttrH2<1?Math.round(mttrH2*60)+' min':mttrH2.toFixed(1)+' h')+'</b> en volver. '+
+          'El cuello de botella es <b>la velocidad de respuesta</b>. Invertí en <b>repuestos en stock, procedimientos de reparación y capacitación del equipo</b>.';
+      } else {
+        plTag.textContent='Equilibrado';
+        plTxt.innerHTML='Confiabilidad y velocidad de respuesta pesan de forma <b>similar</b> en tu caso. '+
+          'Conviene medir por equipo antes de decidir dónde invertir: el promedio de planta suele esconder uno o dos equipos que concentran el problema.';
+      }
+      lever.style.display='flex';
+    } else {
+      lever.style.display='none';
     }
   }
 
